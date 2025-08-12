@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magyar E-könyv Radar — Fullos</title>
+<style>
+  :root{--bg:#0f1724;--card:#0b1220;--accent:#7dd3fc;--muted:#9ca3af}
+  body{font-family:Inter,Segoe UI,Arial,sans-serif;margin:0;background:linear-gradient(180deg,#071127 0%, #071733 100%);color:#e6eef8}
+  .wrap{max-width:980px;margin:28px auto;padding:20px}
+  header{display:flex;align-items:center;gap:16px}
+  h1{margin:0;font-size:20px}
+  p.lead{color:var(--muted);margin:6px 0 18px}
+  .card{background:rgba(255,255,255,0.03);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  input[type=text]{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+  .controls{display:flex;gap:8px;align-items:center}
+  button{background:var(--accent);border:none;color:#022;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+  .small{font-size:13px;color:var(--muted)}
+  .multiselect{display:flex;gap:8px;flex-wrap:wrap}
+  label.opt{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(255,255,255,0.02);border-radius:8px}
+  footer{margin-top:14px;color:var(--muted);font-size:13px}
+  @media (max-width:640px){header{flex-direction:column;align-items:flex-start} .row{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>🚀 Magyar E-könyv Radar — Vadászpilóta mód</h1>
+      <p class="lead">Keresés magyar nyelvű PDF, TXT, DOCX, MOBI, EPUB fájlokra — egyszerre több forráson.</p>
+    </div>
+  </header>
+
+  <div class="card" role="region" aria-label="kereső panel">
+    <div class="row" style="align-items:center;margin-bottom:10px">
+      <input id="query" type="text" placeholder="Könyvcím, szerző, kulcsszó... (pl. József Attila)" />
+      <div class="controls">
+        <button id="searchAllBtn">🔎 Keresés — MINDENHOL</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div class="small">Formátumok (katt a kiválasztáshoz)</div>
+      <div class="multiselect" id="formats">
+        <label class="opt"><input type="checkbox" value="pdf" checked /> PDF</label>
+        <label class="opt"><input type="checkbox" value="txt" checked /> TXT</label>
+        <label class="opt"><input type="checkbox" value="docx" checked /> DOCX</label>
+        <label class="opt"><input type="checkbox" value="mobi" checked /> MOBI</label>
+        <label class="opt"><input type="checkbox" value="epub" checked /> EPUB</label>
+      </div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <div class="small">Források</div>
+      <div class="multiselect" id="sources">
+        <label class="opt"><input type="checkbox" value="google" checked /> Google</label>
+        <label class="opt"><input type="checkbox" value="duck" checked /> DuckDuckGo</label>
+        <label class="opt"><input type="checkbox" value="bing" checked /> Bing</label>
+        <label class="opt"><input type="checkbox" value="mek" checked /> MEK (mek.oszk.hu)</label>
+        <label class="opt"><input type="checkbox" value="dia" checked /> DIA (dia.jadox.pim.hu)</label>
+        <label class="opt"><input type="checkbox" value="moly" checked /> Moly.hu</label>
+        <label class="opt"><input type="checkbox" value="ekonyvforum" checked /> e-konyv fórumok / blogok</label>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <label class="small">Nyelv:</label>
+      <select id="lang">
+        <option value="hu" selected>Magyar (lang:hu + .hu elsőbbség)</option>
+        <option value="all">Minden nyelv (csak fájlformátum szűrés)</option>
+      </select>
+
+      <label style="margin-left:12px" class="small">Megnyitás:</label>
+      <select id="openMode">
+        <option value="tabs" selected>Új lapokban (több)</option>
+        <option value="windows">Új ablakban</option>
+        <option value="single">Egy ablak, első találat</option>
+      </select>
+
+      <label style="margin-left:12px" class="small"><input type="checkbox" id="useSiteHu" checked /> Előnyben a .hu oldalak (site:.hu)</label>
+    </div>
+
+    <footer>
+      Tipp: használhatsz speciális keresőoperátorokat a mezőben, pl. <code>"A Pál utcai fiúk"</code> vagy <code>"szerző:Molnár Ferenc"</code>.
+    </footer>
+  </div>
+
+  <div style="height:12px"></div>
+
+  <div class="card">
+    <div class="small">Egyenkénti keresések (ha csak egy motor kell)</div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <button onclick="searchEngine('google')">Google</button>
+      <button onclick="searchEngine('duck')">DuckDuckGo</button>
+      <button onclick="searchEngine('bing')">Bing</button>
+      <button onclick="searchMEK()">MEK keresés</button>
+      <button onclick="searchDIA()">DIA keresés</button>
+      <button onclick="searchMoly()">Moly.hu keresés</button>
+      <button onclick="searchForums()">Fórumok & Blogok</button>
+    </div>
+  </div>
+
+  <div style="height:8px"></div>
+  <div class="small">Szeretnéd, hogy csomagoljam ZIP-be ezt a HTML-t, vagy hogy hozzáadjak egy egyszerű beépített eredmény-panelt (iframe) az oldalon belüli előnézethez? Írj, és kiterjesztem.</div>
+</div>
+
+<script>
+function getCheckedValues(containerId){
+  const c = document.getElementById(containerId).querySelectorAll('input[type=checkbox]');
+  return Array.from(c).filter(x=>x.checked).map(x=>x.value);
+}
+
+function buildFormatQuery(formats){
+  if(!formats || formats.length===0) return '';
+  // filetype:pdf OR filetype:txt ...
+  return '(' + formats.map(f => 'filetype:' + f).join(' OR ') + ')';
+}
+
+function preferHu(q) {
+  const useSiteHu = document.getElementById('useSiteHu').checked;
+  const lang = document.getElementById('lang').value;
+  let parts = [];
+  if(lang === 'hu') parts.push('lang:hu');
+  if(useSiteHu) parts.push('site:.hu');
+  return q + (parts.length ? ' ' + parts.join(' ') : '');
+}
+
+function openUrls(urls){
+  const mode = document.getElementById('openMode').value;
+  if(mode === 'single'){
+    window.open(urls[0],'_blank');
+    return;
+  }
+  // tabs/windows
+  urls.forEach(u => window.open(u, mode === 'tabs' ? '_blank' : '_blank'));
+}
+
+function searchEngine(engine){
+  const qRaw = document.getElementById('query').value.trim();
+  if(!qRaw) return alert('Adj meg egy keresési kulcsszót!');
+  const formats = getCheckedValues('formats');
+  const formatQuery = buildFormatQuery(formats);
+  let q = qRaw + (formatQuery ? ' ' + formatQuery : '');
+  q = preferHu(q);
+
+  let url='';
+  if(engine==='google'){
+    url = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+  } else if(engine==='duck'){
+    url = 'https://duckduckgo.com/?q=' + encodeURIComponent(q);
+  } else if(engine==='bing'){
+    url = 'https://www.bing.com/search?q=' + encodeURIComponent(q);
+  }
+  if(url) openUrls([url]);
+}
+
+function searchMEK(){
+  const q = document.getElementById('query').value.trim();
+  if(!q) return alert('Adj meg egy keresési kulcsszót!');
+  const mek = 'https://mek.oszk.hu/cgi/search2.cgi?type=1&sc=1&ml=20&sort=0&sz=25&q=' + encodeURIComponent(q);
+  openUrls([mek]);
+}
+
+function searchDIA(){
+  const q = document.getElementById('query').value.trim();
+  if(!q) return alert('Adj meg egy keresési kulcsszót!');
+  const dia = 'https://dia.jadox.pim.hu/jetspeed/displayXhtml?offset=0&table=Document&searchString=' + encodeURIComponent(q);
+  openUrls([dia]);
+}
+
+function searchMoly(){
+  const q = document.getElementById('query').value.trim();
+  if(!q) return alert('Adj meg egy keresési kulcsszót!');
+  const moly = 'https://moly.hu/search/site/' + encodeURIComponent(q);
+  openUrls([moly]);
+}
+
+function searchForums(){
+  const qRaw = document.getElementById('query').value.trim();
+  if(!qRaw) return alert('Adj meg egy keresési kulcsszót!');
+  const formats = getCheckedValues('formats');
+  const formatQuery = buildFormatQuery(formats);
+  let q = qRaw + (formatQuery ? ' ' + formatQuery : '');
+  q = preferHu(q);
+  // several general blog/forum searches that often surface direct ebook links
+  const urls = [
+    'https://duckduckgo.com/?q=' + encodeURIComponent(q + ' site:forum site:blog.hu'),
+    'https://www.google.com/search?q=' + encodeURIComponent(q + ' site:forum OR site:blog.hu OR site:board.hu OR site:forum.index.hu'),
+    'https://www.bing.com/search?q=' + encodeURIComponent(q + ' site:forum OR site:blog.hu OR "letöltés"')
+  ];
+  openUrls(urls);
+}
+
+// Search All — opens selected engines plus direct sources
+document.getElementById('searchAllBtn').addEventListener('click', function(){
+  const qRaw = document.getElementById('query').value.trim();
+  if(!qRaw) return alert('Adj meg egy keresési kulcsszót!');
+  const formats = getCheckedValues('formats');
+  const formatQuery = buildFormatQuery(formats);
+  let q = qRaw + (formatQuery ? ' ' + formatQuery : '');
+  q = preferHu(q);
+
+  const chosen = getCheckedValues('sources');
+  const urls = [];
+  if(chosen.includes('google')) urls.push('https://www.google.com/search?q=' + encodeURIComponent(q));
+  if(chosen.includes('duck')) urls.push('https://duckduckgo.com/?q=' + encodeURIComponent(q));
+  if(chosen.includes('bing')) urls.push('https://www.bing.com/search?q=' + encodeURIComponent(q));
+  if(chosen.includes('mek')) urls.push('https://mek.oszk.hu/cgi/search2.cgi?type=1&sc=1&ml=20&sort=0&sz=25&q=' + encodeURIComponent(qRaw));
+  if(chosen.includes('dia')) urls.push('https://dia.jadox.pim.hu/jetspeed/displayXhtml?offset=0&table=Document&searchString=' + encodeURIComponent(qRaw));
+  if(chosen.includes('moly')) urls.push('https://moly.hu/search/site/' + encodeURIComponent(qRaw));
+  if(chosen.includes('ekonyvforum')){
+    urls.push('https://www.google.com/search?q=' + encodeURIComponent(q + ' "letöltés" OR "letoltes"'));
+    urls.push('https://duckduckgo.com/?q=' + encodeURIComponent(q + ' "letöltés" OR "letoltes"'));
+  }
+
+  if(urls.length===0) return alert('Válassz legalább egy forrást!');
+  openUrls(urls);
+});
+
+</script>
+</body>
+</html>
