@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF Radar – Többszörös PDF kereső</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      margin: 2em;
+      text-align: center;
+    }
+    input[type=text] {
+      width: 60%;
+      padding: 0.5em;
+      font-size: 1.2em;
+      border-radius: 6px;
+      border: 2px solid #007acc;
+      margin-bottom: 1em;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 0.6em 1.5em;
+      border-radius: 6px;
+      border: none;
+      background-color: #007acc;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #005f99;
+    }
+    footer {
+      margin-top: 3em;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>PDF Radar 🔎📚</h1>
+  <p>Írd be a keresett kulcsszót, majd kattints a „Keresés” gombra,<br>hogy egyszerre több PDF keresőn is megtaláld a könyveket, tanulmányokat!</p>
+  
+  <input type="text" id="query" placeholder="Pl.: pszichológia, spiritualitás, művészet..." />
+  <br />
+  <button onclick="searchPDFs()">Keresés PDF-ek között</button>
+  
+  <script>
+    function searchPDFs() {
+      const q = encodeURIComponent(document.getElementById('query').value.trim());
+      if (!q) {
+        alert('Kérlek, adj meg egy keresőszót!');
+        return;
+      }
+      
+      const urls = [
+        `https://www.pdfdrive.com/search?q=${q}`,
+        `https://singlelogin.se/s/search?q=${q}`,  // Z-Library (regisztráció szükséges)
+        `https://www.google.com/search?q=site:.hu+filetype:pdf+${q}`,  // Magyar PDF Google keresés
+        `https://www.google.com/search?q=filetype:pdf+${q}`,  // Google PDF keresés
+        `https://archive.org/search.php?query=${q}+AND+format:pdf`,  // Internet Archive PDF keresés
+        `https://www.base-search.net/Search/Results?lookfor=${q}&type=AllFields&filter[]=format_str%3Apdf`  // BASE PDF kereső
+      ];
+      
+      // Megnyitás új ablakokban/fülekben
+      urls.forEach(url => window.open(url, '_blank'));
+    }
+  </script>
+  
+  <footer>
+    Készült neked – privát, ingyenes PDF kereséshez 💖<br>
+    Használat előtt regisztrálj a Z-Library-n, ha szeretnéd azt is használni.
+  </footer>
+</body>
+</html>
